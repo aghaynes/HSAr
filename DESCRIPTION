@@ -6,5 +6,5 @@ Description: Automates the delineation of hospital service areas (HSAs). Previou
 Depends: R (>= 3.3.2), data.table, rgeos, maptools
 License: What license is it under?
 Encoding: UTF-8
-LazyData: false
+LazyData: true
 RoxygenNote: 6.1.1

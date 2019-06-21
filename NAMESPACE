@@ -2,6 +2,7 @@
 
 export(flows)
 export(gen_hsa)
+export(gen_hsa_clust)
 export(minimap)
 export(minimap.SpatialPolygonsDataFrame)
 export(minimap.default)
