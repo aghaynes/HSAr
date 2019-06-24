@@ -42,13 +42,15 @@ devtools::install_github("aghaynes/HSAr")
 
 ``` r
 library(HSAr)
+options(stringsAsFactors = FALSE)
 ```
 
 ### Load your datafiles
 
-Two types of data are required for `HSAr`: 1. a shapefile defining the
-spatial relationship between regions 2. source and destination of
-individuals
+Two types of data are required for `HSAr`
+
+1.  a shapefile defining the spatial relationship between regions
+2.  source and destination of individuals
 
 #### Spatial data
 
@@ -67,7 +69,7 @@ Whichever way you choose to use to get your spatial data into R, it
 needs to be a SpatialPolygonsDataFrame object (as opposed to a sf
 object). If you have an sf type object, `as(x, "Spatial")` can be used.
 
-`HSAr` has n example shapefile which can be loaded via
+`HSAr` has an example shapefile which can be loaded via
 
 ``` r
 data(shape)
@@ -99,10 +101,15 @@ flowdata <- read.csv("path_to_data.csv")
 # head(flowdata)
 ```
 
-A demo dataset is included in the package
+A demo dataset is included in the package, containing the home and
+hospital locations of 1178 patients what live in the region contained in
+the `shape` shapefile above.
 
 ``` r
-data(flow, package = "HSAr")
+data(flow)
+```
+
+``` r
 head(flow)
 ```
 
@@ -115,7 +122,7 @@ head(flow)
     ## 6    I  S
 
 ``` r
-table(flow$from)
+table(flow$from) # where they live
 ```
 
     ## 
@@ -125,7 +132,7 @@ table(flow$from)
     ##  30
 
 ``` r
-table(flow$to)
+table(flow$to) # where they received care
 ```
 
     ## 
@@ -154,62 +161,113 @@ head(f)
     ## 6    B  J 27    100  321      0.27 0.084112150         2       2
 
 We see that 26 people move from A to C (65% of those in A and 8% of
-those that go to C). Ranks are also provided (C receives most from A -
-rank is 1 - and A represents the 5th most people going to C).
+those that go to C). Ranks are also provided (most from A go to C - rank
+is 1 - and A represents the 5th most people going to C).
 
 #### Exploring maps
 
 `HSAr` also provides a functions for exploring maps. You might want to
 look at a specific HSA for example. The `minimap` function allows you to
 zoom into a given HSA (or more generally, a polygon in a shapefile) by
-providing suitable regular expression to identify it (see `?regex`). The
-selected regions are highlighted in green.
+providing suitable a regular expression to identify it (see `?regex`).
+The selected regions are highlighted in green.
 
 ``` r
 # Show all regions
 minimap(shape)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
-# Show region P
+# Show region B
 minimap(shape, polygon = "B")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
 
 ``` r
-# Show region P or J
+# Show region B or C
 par(mfrow = c(1,3))
 minimap(shape, polygon = "B|C")
-# equivalently, minimap(shape, polygon = "[PJ]")
+# equivalently, minimap(shape, polygon = "[BC]")
 # changing the zoom is also possible, which is particularly useful for larger maps
 minimap(shape, polygon = "B|C", zoomout = .01)
 minimap(shape, polygon = "B|C", zoomout = 1)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-3.png)<!-- -->
 
 For our example, we could look at which regions have hospitals (or at
-least receive patients), and which receive no patients:
+least receive patients; left), and which receive no patients (right):
 
 ``` r
 par(mfrow = c(1,2))
-minimap(shape, polygon = paste(unique(flow$to), collapse = "|"), zoomout = 0.1)
-minimap(shape, polygon = paste(shape$reg[!shape$reg %in% flow$from], collapse = "|"), zoomout = 1)
+minimap(shape, polygon = paste(unique(flow$to), collapse = "|"), zoomout = 0)
+minimap(shape, polygon = paste(shape$reg[!shape$reg %in% flow$from], collapse = "|"), zoomout = .75)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
-
-We can also check which regions had no patients
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 #### Generating HSAs
 
-The goal of `HSAr` is to make the generation of HSAs quick and easy. the
-`gen_hsa` function is the main work-horse of the package. By default, it
-will plot a map of the current allocations at the beginning of each
-iteration. The number of iterations depends the number of regions.
+The goal of `HSAr` is to make the generation of HSAs quick and easy. The
+`gen_hsa` (generate HSAs) function is the main work-horse of the
+package. It iteratively looks at each region which receives patients,
+identifies the neighbours and merges them with the hospital region if
+most flow is in that direction. It will keep doing that until it has
+allocated all regions.
+
+<details>
+
+<summary>Specific details (click to expand)</summary>
+
+As an example, if we look at region S, the algorithm identifies the
+neighbours (H, I, P, T, V), then finds looks at from which most patients
+go to the focal hospital (H, I, T, V) and lumps those regions together
+with the hospital for the next iteration (remember that P has no
+patients, so that region doesn’t appear in the flows, which are
+basically just cross tabulations).
+
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+
+    ##    from to  N rank_from
+    ## 25    H  S 33         1
+    ## 29    I  S 18         1
+    ## 65    T  S 65         1
+    ## 73    V  S 17         1
+
+The next iteration for hospital S then looks at regions neighbouring
+S+H+I+V+T and merges them if most patients go to S (or another hospital
+within S+H+I+V+T, if that should be the case), which might be region U.
+In this way, HSAs grow organically around the hospitals.
+
+Once no more changes are necessary, the algorithm will check that each
+“proto-HSA” is valid - that it meets the requirements of having a high
+enough localization index (proportion of people remaining in the HSA,
+defaults to 0.5 = 50%) and number of interventions (defaults to 10). At
+this point, regions without patients would fail both of these tests and
+the algorithm estimates the regions flow based on the flows of the
+neighbours. In this case, it is allocated to S.
+
+    ##   to   N
+    ## 4  S 191
+    ## 2  J 113
+    ## 3  O  67
+    ## 1  C  39
+
+Proto-HSAs that do have patients, but fail either due to low LI or
+number of intervention are merged with the proto-HSA receiving most
+flow.
+
+Once this has been done, the algorithm starts again to ensure that no
+more HSAs should be merged and all HSAs are valid.
+
+</details>
+
+By default, `gen_hsa` will plot a map of the current allocations at the
+beginning of each iteration. The number of iterations required depends
+the number of regions.
 
 ``` r
 par(mfrow = c(2,4))
@@ -275,12 +333,10 @@ summary(hsas)
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     ##   318.0   336.5   355.0   392.7   430.0   505.0
 
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 Summary, plot and minimap methods exist for the returned hsa object,
-making it easy to view the results. Both plot and minimap methods show
-the regions making up the HSAs as well as the HSAs themselves (in grey),
-but minimap adds labels to the map.
+making it easy to view the results.
 
 ``` r
 par(mfrow = c(1,3))
@@ -321,7 +377,7 @@ summary(hsas, plot = TRUE)
     ## 
     ## Creating 3 plots
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 Most important here are the localization index and number of
 interventions sections at the end. The plot option can be used to show
@@ -330,13 +386,17 @@ loop and the number of interventions and localization index in the
 resulting HSAs. Options `li` and `n_interv` will also return these
 numbers in a table.
 
+Both plot and minimap methods show the regions making up the HSAs as
+well as the HSAs themselves (in grey), but minimap adds labels to the
+map.
+
 ``` r
 par(mfrow = c(1,2))
 plot(hsas)
 minimap(hsas)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 The final shapefile and a lookup table to assign regions to HSAs are
 accessed via
@@ -346,11 +406,71 @@ hsa_shape <- hsas$shp
 hsa_lookup <- hsas$lookup
 ```
 
-These files can then be saved later use in R or other software.
+These files can then be saved for later use in R or other software.
+
+#### A clustering based approach
+
+A clustering based approach to creating hospital regions was published
+by (Delamater, Shortridge, and Messina 2013), together with code for its
+implementation. A modified version is provided here, as it is discussed
+in the provisionally accepted paper. Where (Delamater, Shortridge, and
+Messina 2013) use hospital beds and staffing to define the similarity
+among hospitals, we use the distance between regions. The method uses a
+two-step K-means and Wards clustering approach to first derive the best
+number of clusters (HSAs) and then assign regions to a cluster. Compared
+to the more classical approach, this method can produce very different
+results and might be better for cases where there are already more
+distinct regions in the data (e.g. fewer, larger hospitals which have
+natural catchment areas, rather than cases where there are many
+hospitals with largely overlapping catchments). The example data
+provided in the package, for example, was designed to produce three
+HSAs, which it does using the method above. Using the cluster-based
+approach it produces only two HSAs.
+
+Besides using the distance between the regions to define the similarity,
+we also made two other changes to the original implementation: 1. The
+original method for identifying the number of clusters does not perform
+well when there are few hospitals. A second approach is provided through
+the `peak` argument which can take values of `dela` (short for
+delamater) or `diff` (which is the R function used in the
+implementation, short for difference). If the default setting produces
+an error, try the other setting, as in the example
+below.
+
+``` r
+chsas <- gen_hsa_clust(shp = shape, from = flow$from, to = flow$to, max_clusters = 21, peaks = "diff")
+```
+
+    ## Warning: 2 regions in 'shp' not in 'from'.
+
+    ## 
+    ## Filling N with 236 observations
+    ## Filling P with 646 observations
+
+    ## Warning: 17 regions in 'shp' not in 'to'.
+
+    ## ....
+
+``` r
+par(mfrow = c(1,2))
+plot(chsas$shp)
+plot(hsas)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 # References
 
 <div id="refs" class="references">
+
+<div id="ref-delamater2013">
+
+Delamater, Paul L., Ashton M. Shortridge, and Joseph P. Messina. 2013.
+“Regional Health Care Planning: A Methodology to Cluster Facilities
+Using Community Utilization Patterns.” *BMC Health Services Research* 13
+(1):333. <https://doi.org/10.1186/1472-6963-13-333>.
+
+</div>
 
 <div id="ref-Wennberg1973">
 

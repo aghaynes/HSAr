@@ -35,9 +35,10 @@ options(stringsAsFactors = FALSE)
 
 ### Load your datafiles
 
-Two types of data are required for `HSAr`:
-1. a shapefile defining the spatial relationship between regions
-2. source and destination of individuals
+Two types of data are required for `HSAr`
+
+  1.  a shapefile defining the spatial relationship between regions
+  2.  source and destination of individuals
 
 #### Spatial data
 There are many ways to get shapefiles into R. A common one is using the `rgdal` package which can read OGR datafiles (e.g. ESRI shapefiles).
@@ -52,7 +53,7 @@ plot(shape)
 
 Whichever way you choose to use to get your spatial data into R, it needs to be a SpatialPolygonsDataFrame object (as opposed to a sf object). If you have an sf type object, `as(x, "Spatial")` can be used.
 
-`HSAr` has n example shapefile which can be loaded via
+`HSAr` has an example shapefile which can be loaded via
 ```{r}
 data(shape)
 plot(shape)
@@ -74,12 +75,20 @@ flowdata <- read.csv("path_to_data.csv")
 # head(flowdata)
 ```
 
-A demo dataset is included in the package
+```{r, echo = FALSE}
+data(flow)
+```
+
+
+A demo dataset is included in the package, containing the home and hospital locations of `r nrow(flow)` patients what live in the region contained in the `shape` shapefile above.
+```{r, eval = FALSE}
+data(flow)
+```
+
 ```{r}
-data(flow, package = "HSAr")
 head(flow)
-table(flow$from)
-table(flow$to)
+table(flow$from) # where they live
+table(flow$to) # where they received care
 ```
 
 There are patients travelling from `r length(unique(flow$from))` to `r length(unique(flow$to))` regions. Note that there are `r length(shape)` regions in the shapefile, so no one from `r length(shape) - length(unique(flow$from))` regions were hospitalized. 
@@ -91,20 +100,20 @@ f <- flows(flow$from, flow$to)
 head(f)
 ```
 
-We see that 26 people move from A to C (65% of those in A and 8% of those that go to C). Ranks are also provided (C receives most from A - rank is 1 - and A represents the 5th most people going to C).
+We see that 26 people move from A to C (65% of those in A and 8% of those that go to C). Ranks are also provided (most from A go to C - rank is 1 - and A represents the 5th most people going to C).
 
 #### Exploring maps
-`HSAr` also provides a functions for exploring maps. You might want to look at a specific HSA for example. The `minimap` function allows you to zoom into a given HSA (or more generally, a polygon in a shapefile) by providing suitable regular expression to identify it (see `?regex`). The selected regions are highlighted in green.
+`HSAr` also provides a functions for exploring maps. You might want to look at a specific HSA for example. The `minimap` function allows you to zoom into a given HSA (or more generally, a polygon in a shapefile) by providing suitable a regular expression to identify it (see `?regex`). The selected regions are highlighted in green.
 
 ```{r}
 # Show all regions
 minimap(shape)
-# Show region P
+# Show region B
 minimap(shape, polygon = "B")
-# Show region P or J
+# Show region B or C
 par(mfrow = c(1,3))
 minimap(shape, polygon = "B|C")
-# equivalently, minimap(shape, polygon = "[PJ]")
+# equivalently, minimap(shape, polygon = "[BC]")
 # changing the zoom is also possible, which is particularly useful for larger maps
 minimap(shape, polygon = "B|C", zoomout = .01)
 minimap(shape, polygon = "B|C", zoomout = 1)
@@ -114,29 +123,70 @@ minimap(shape, polygon = "B|C", zoomout = 1)
 For our example, we could look at which regions have hospitals (or at least receive patients; left), and which receive no patients (right):
 ```{r}
 par(mfrow = c(1,2))
-minimap(shape, polygon = paste(unique(flow$to), collapse = "|"), zoomout = 0.1)
-minimap(shape, polygon = paste(shape$reg[!shape$reg %in% flow$from], collapse = "|"), zoomout = 1)
+minimap(shape, polygon = paste(unique(flow$to), collapse = "|"), zoomout = 0)
+minimap(shape, polygon = paste(shape$reg[!shape$reg %in% flow$from], collapse = "|"), zoomout = .75)
 
 ```
 
-We can also check which regions had no patients
-
 #### Generating HSAs
-The goal of `HSAr` is to make the generation of HSAs quick and easy. the `gen_hsa` function is the main work-horse of the package. By default, it will plot a map of the current allocations at the beginning of each iteration. The number of iterations depends the number of regions.
+The goal of `HSAr` is to make the generation of HSAs quick and easy. The `gen_hsa` (generate HSAs) function is the main work-horse of the package. It iteratively looks at each region which receives patients, identifies the neighbours and merges them with the hospital region if most flow is in that direction. It will keep doing that until it has allocated all regions. 
+
+
+<details><summary>Specific details (click to expand)</summary>
+
+```{r, echo = FALSE}
+n <- gTouches(shape, byid = TRUE, returnDense = FALSE)
+h <- "S"
+on <- n[[h]]
+on <- shape$reg[on]
+w <- f$to == h & f$from %in% on
+f2 <- f[w, c("from", "to", "N", "rank_from")]
+```
+
+As an example, if we look at region `r h`, the algorithm identifies the neighbours (`r paste(on, collapse = ", ")`), then finds looks at from which most patients go to the focal hospital (`r paste(f2$from, collapse = ", ")`) and lumps those regions together with the hospital for the next iteration (remember that P has no patients, so that region doesn't appear in the flows, which are basically just cross tabulations).
+
+```{r, echo = FALSE}
+minimap(shape[shape$reg %in% c(h, on), ], shape, polygon = h, zoomout = 2)
+f2
+```
+
+The next iteration for hospital S then looks at regions neighbouring S+H+I+V+T and merges them if most patients go to S (or another hospital within S+H+I+V+T, if that should be the case), which might be region U. In this way, HSAs grow organically around the hospitals.
+
+Once no more changes are necessary, the algorithm will check that each "proto-HSA" is valid - that it meets the requirements of having a high enough localization index (proportion of people remaining in the HSA, defaults to 0.5 = 50%) and number of interventions (defaults to 10). At this point, regions without patients would fail both of these tests and the algorithm estimates the regions flow based on the flows of the neighbours. In this case, it is allocated to S.
+
+```{r, echo = FALSE}
+h <- "P"
+on <- n[[h]]
+on <- shape$reg[on]
+w <- f$from %in% on
+f2 <- f[w, c("from", "to", "N", "rank_from")]
+agg <- aggregate(N ~ to, f2, sum)
+agg[order(agg$N, decreasing = TRUE), ]
+```
+
+Proto-HSAs that do have patients, but fail either due to low LI or number of intervention are merged with the proto-HSA receiving most flow.
+
+Once this has been done, the algorithm starts again to ensure that no more HSAs should be merged and all HSAs are valid.
+
+</details>
+
+By default, `gen_hsa` will plot a map of the current allocations at the beginning of each iteration. The number of iterations required depends the number of regions.
 ```{r}
 par(mfrow = c(2,4))
 hsas <- gen_hsa(shp = shape, from = flow$from, to = flow$to)
 summary(hsas)
 ```
 
-Summary, plot and minimap methods exist for the returned hsa object, making it easy to view the results. Both plot and minimap methods show the regions making up the HSAs as well as the HSAs themselves (in grey), but minimap adds labels to the map.
+Summary, plot and minimap methods exist for the returned hsa object, making it easy to view the results. 
 
 ```{r, fig.height=3}
 par(mfrow = c(1,3))
 summary(hsas, plot = TRUE)
 ```
 
-Most important here are the localization index and number of interventions sections at the end. The plot option can be used to show three figures depicting the number of regions at each iteration of the loop and the number of interventions and localization index in the resulting HSAs. Options `li` and `n_interv` will also return these numbers in a table.
+Most important here are the localization index and number of interventions sections at the end. The plot option can be used to show three figures depicting the number of regions at each iteration of the loop and the number of interventions and localization index in the resulting HSAs. Options `li` and `n_interv` will also return these numbers in a table. 
+
+Both plot and minimap methods show the regions making up the HSAs as well as the HSAs themselves (in grey), but minimap adds labels to the map.
 
 ```{r}
 par(mfrow = c(1,2))
@@ -150,7 +200,7 @@ hsa_shape <- hsas$shp
 hsa_lookup <- hsas$lookup
 ```
 
-These files can then be saved later use in R or other software.
+These files can then be saved for later use in R or other software.
 
 #### A clustering based approach
 
