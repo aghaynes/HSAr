@@ -4,6 +4,11 @@ bibliography: references.bib
 ---
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+```{r, echo = FALSE}
+knitr::opts_knit$set(fig.path = "man/figures/",
+                     collapse = TRUE)
+```
+
 
 # HSAr - Automated HSA delineation through R
 
@@ -28,6 +33,7 @@ devtools::install_github("aghaynes/HSAr")
 
 ## Using HSAr
 ### Load the package
+The package is loaded in the normal manner for R packages. I also recommend setting `stringsAsFactors` to `FALSE` as this frequently causes unexpected behaviour. 
 ```{r, echo = TRUE, warning=FALSE, message=FALSE}
 library(HSAr)
 options(stringsAsFactors = FALSE)
@@ -54,7 +60,7 @@ plot(shape)
 Whichever way you choose to use to get your spatial data into R, it needs to be a SpatialPolygonsDataFrame object (as opposed to a sf object). If you have an sf type object, `as(x, "Spatial")` can be used.
 
 `HSAr` has an example shapefile which can be loaded via
-```{r}
+```{r shape_example}
 data(shape)
 plot(shape)
 ```
@@ -105,7 +111,7 @@ We see that 26 people move from A to C (65% of those in A and 8% of those that g
 #### Exploring maps
 `HSAr` also provides a functions for exploring maps. You might want to look at a specific HSA for example. The `minimap` function allows you to zoom into a given HSA (or more generally, a polygon in a shapefile) by providing suitable a regular expression to identify it (see `?regex`). The selected regions are highlighted in green.
 
-```{r}
+```{r minimap_example}
 # Show all regions
 minimap(shape)
 # Show region B
@@ -121,7 +127,7 @@ minimap(shape, polygon = "B|C", zoomout = 1)
 ```
 
 For our example, we could look at which regions have hospitals (or at least receive patients; left), and which receive no patients (right):
-```{r}
+```{r minimap_to_missing}
 par(mfrow = c(1,2))
 minimap(shape, polygon = paste(unique(flow$to), collapse = "|"), zoomout = 0)
 minimap(shape, polygon = paste(shape$reg[!shape$reg %in% flow$from], collapse = "|"), zoomout = .75)
@@ -145,7 +151,7 @@ f2 <- f[w, c("from", "to", "N", "rank_from")]
 
 As an example, if we look at region `r h`, the algorithm identifies the neighbours (`r paste(on, collapse = ", ")`), then finds looks at from which most patients go to the focal hospital (`r paste(f2$from, collapse = ", ")`) and lumps those regions together with the hospital for the next iteration (remember that P has no patients, so that region doesn't appear in the flows, which are basically just cross tabulations).
 
-```{r, echo = FALSE}
+```{r flow_details, echo = FALSE}
 minimap(shape[shape$reg %in% c(h, on), ], shape, polygon = h, zoomout = 2)
 f2
 ```
@@ -171,7 +177,7 @@ Once this has been done, the algorithm starts again to ensure that no more HSAs 
 </details>
 
 By default, `gen_hsa` will plot a map of the current allocations at the beginning of each iteration. The number of iterations required depends the number of regions.
-```{r}
+```{r generate}
 par(mfrow = c(2,4))
 hsas <- gen_hsa(shp = shape, from = flow$from, to = flow$to)
 summary(hsas)
@@ -179,7 +185,7 @@ summary(hsas)
 
 Summary, plot and minimap methods exist for the returned hsa object, making it easy to view the results. 
 
-```{r, fig.height=3}
+```{r summary, fig.height=3}
 par(mfrow = c(1,3))
 summary(hsas, plot = TRUE)
 ```
@@ -188,7 +194,7 @@ Most important here are the localization index and number of interventions secti
 
 Both plot and minimap methods show the regions making up the HSAs as well as the HSAs themselves (in grey), but minimap adds labels to the map.
 
-```{r}
+```{r plotmethods}
 par(mfrow = c(1,2))
 plot(hsas)
 minimap(hsas)
@@ -210,7 +216,7 @@ Besides using the distance between the regions to define the similarity, we also
 1. The original method for identifying the number of clusters does not perform well when there are few hospitals. A second approach is provided through the `peak` argument which can take values of `dela` (short for delamater) or `diff` (which is the R function used in the implementation, short for difference). If the default setting produces an error, try the other setting, as in the example below.
 
 
-```{r}
+```{r cluster}
 chsas <- gen_hsa_clust(shp = shape, from = flow$from, to = flow$to, max_clusters = 21, peaks = "diff")
 par(mfrow = c(1,2))
 plot(chsas$shp)

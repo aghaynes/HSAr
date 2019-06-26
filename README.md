@@ -40,6 +40,10 @@ devtools::install_github("aghaynes/HSAr")
 
 ### Load the package
 
+The package is loaded in the normal manner for R packages. I also
+recommend setting `stringsAsFactors` to `FALSE` as this frequently
+causes unexpected behaviour.
+
 ``` r
 library(HSAr)
 options(stringsAsFactors = FALSE)
@@ -76,7 +80,7 @@ data(shape)
 plot(shape)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](README_files/figure-gfm/shape_example-1.png)<!-- -->
 
 The rownames of the spatial data should be consistent with the names in
 the patient data. It is normally necessary to do this after importing
@@ -177,14 +181,14 @@ The selected regions are highlighted in green.
 minimap(shape)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](README_files/figure-gfm/minimap_example-1.png)<!-- -->
 
 ``` r
 # Show region B
 minimap(shape, polygon = "B")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
+![](README_files/figure-gfm/minimap_example-2.png)<!-- -->
 
 ``` r
 # Show region B or C
@@ -196,7 +200,7 @@ minimap(shape, polygon = "B|C", zoomout = .01)
 minimap(shape, polygon = "B|C", zoomout = 1)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-11-3.png)<!-- -->
+![](README_files/figure-gfm/minimap_example-3.png)<!-- -->
 
 For our example, we could look at which regions have hospitals (or at
 least receive patients; left), and which receive no patients (right):
@@ -207,7 +211,7 @@ minimap(shape, polygon = paste(unique(flow$to), collapse = "|"), zoomout = 0)
 minimap(shape, polygon = paste(shape$reg[!shape$reg %in% flow$from], collapse = "|"), zoomout = .75)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/minimap_to_missing-1.png)<!-- -->
 
 #### Generating HSAs
 
@@ -229,7 +233,7 @@ with the hospital for the next iteration (remember that P has no
 patients, so that region doesn’t appear in the flows, which are
 basically just cross tabulations).
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/flow_details-1.png)<!-- -->
 
     ##    from to  N rank_from
     ## 25    H  S 33         1
@@ -333,7 +337,7 @@ summary(hsas)
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     ##   318.0   336.5   355.0   392.7   430.0   505.0
 
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](README_files/figure-gfm/generate-1.png)<!-- -->
 
 Summary, plot and minimap methods exist for the returned hsa object,
 making it easy to view the results.
@@ -377,7 +381,7 @@ summary(hsas, plot = TRUE)
     ## 
     ## Creating 3 plots
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/summary-1.png)<!-- -->
 
 Most important here are the localization index and number of
 interventions sections at the end. The plot option can be used to show
@@ -396,7 +400,7 @@ plot(hsas)
 minimap(hsas)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/plotmethods-1.png)<!-- -->
 
 The final shapefile and a lookup table to assign regions to HSAs are
 accessed via
@@ -457,7 +461,7 @@ plot(chsas$shp)
 plot(hsas)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](README_files/figure-gfm/cluster-1.png)<!-- -->
 
 # References
 
