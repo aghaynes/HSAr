@@ -1,11 +1,17 @@
 ---
-output: github_document
+output: 
+  github_document:
+    toc: true
+    toc_depth: 5
 bibliography: references.bib
 ---
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- 
+README.md is generated from README.Rmd. Please edit that file 
+Rather than clicking the knit button in RStudio, run knitr::knit("README.Rmd"), otherwise figures go elsewhere (base.dir appears to be ignored)
+-->
 
 ```{r, echo = FALSE}
-knitr::opts_knit$set(fig.path = "man/figures/",
+knitr::opts_knit$set(base.dir = "man",
                      collapse = TRUE)
 ```
 
@@ -210,10 +216,12 @@ These files can then be saved for later use in R or other software.
 
 #### A clustering based approach
 
-A clustering based approach to creating hospital regions was published by [@delamater2013], together with code for its implementation. A modified version is provided here, as it is discussed in the provisionally accepted paper. Where [@delamater2013] use hospital beds and staffing to define the similarity among hospitals, we use the distance between regions. The method uses a two-step K-means and Wards clustering approach to first derive the best number of clusters (HSAs) and then assign regions to a cluster. Compared to the more classical approach, this method can produce very different results and might be better for cases where there are already more distinct regions in the data (e.g. fewer, larger hospitals which have natural catchment areas, rather than cases where there are many hospitals with largely overlapping catchments). The example data provided in the package, for example, was designed to produce three HSAs, which it does using the method above. Using the cluster-based approach it produces only two HSAs.
+A clustering based approach to creating hospital regions was published by [@delamater2013], together with code for its implementation. A modified version is provided here, as it is discussed in the provisionally accepted paper. Where original method used hospital beds and staffing to define the similarity among hospitals, we use the distance between regions and the patient flows. The method uses a two-step K-means and Wards clustering approach to first derive the best number of clusters (HSAs) and then assign regions to a cluster. Compared to the more classical approach, this method can produce very different results and might be better for cases where there are already more distinct regions in the data (e.g. fewer, larger hospitals which have natural catchment areas, rather than cases where there are many hospitals with largely overlapping catchments). The example data provided in the package, for example, was designed to produce three HSAs, which it does using the method above. Using the cluster-based approach it produces only two HSAs.
 
 Besides using the distance between the regions to define the similarity, we also made two other changes to the original implementation:
-1. The original method for identifying the number of clusters does not perform well when there are few hospitals. A second approach is provided through the `peak` argument which can take values of `dela` (short for delamater) or `diff` (which is the R function used in the implementation, short for difference). If the default setting produces an error, try the other setting, as in the example below.
+
+  1. The original method for identifying the number of clusters does not perform well when there are few hospitals. A second approach is provided through the `peak` argument which can take values of `dela` (short for delamater) or `diff` (which is the R function used in the implementation, short for difference). If the default setting produces an error, try the other setting, as in the example below.
+  2. As with the HSAr method above, the cluster based approach cannot allocate regions without flow to a HSA. As above, we have implemented the same filling algorithm here. To turn it off, set the `fill` option to `FALSE`.
 
 
 ```{r cluster}
