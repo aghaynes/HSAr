@@ -256,45 +256,6 @@ hsas <- gen_hsa(shp = shape, from = flow$from, to = flow$to)
 ```
 ![](man/figure/generate-1.png)
 
-```r
-summary(hsas)
-```
-
-```
-## Criteria
-##    Localization Index (LI) threshold:    0.4 
-##    Minimum interventions:                10 
-## Iterations required to satisfy criteria: 5 
-## 
-## Shapefile
-## Number of regions in original shapefile: 21
-## 'shp' regions not in 'from' (2): 
-## N P
-## 'shp' regions not in 'to' (17): 
-## N P
-## 'from' regions not in 'shp' (0): 
-## 
-## 'to' regions not in 'shp' (0): 
-## 
-## HSAs generated (3):
-## C J S
-## Regions assigned to HSAs via:
-##         Var1 Freq
-##  destination    3
-##         flow   15
-##    neighbour    3
-## 
-## 
-## Localization Index
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##  0.5600  0.5770  0.5940  0.5950  0.6125  0.6310 
-## 
-## Interventions
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##   318.0   336.5   355.0   392.7   430.0   505.0
-```
-![](man/figure/generate2-1.png)
-
 Summary, plot and minimap methods exist for the returned hsa object, making it easy to view the results. 
 
 

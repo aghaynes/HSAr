@@ -197,10 +197,6 @@ par(mfrow = c(2,4))
 hsas <- gen_hsa(shp = shape, from = flow$from, to = flow$to)
 ```
 ![](man/figure/generate-1.png)
-```{r generate2, fig.show = "hide"}
-summary(hsas)
-```
-![](man/figure/generate2-1.png)
 
 Summary, plot and minimap methods exist for the returned hsa object, making it easy to view the results. 
 
