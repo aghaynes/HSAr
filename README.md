@@ -69,8 +69,6 @@ data(shape)
 plot(shape)
 ```
 
-![plot of chunk shape_example](figure/shape_example-1.png)
-
 ![](man/figure/shape_example-1.png)
 
 The rownames of the spatial data should be consistent with the names in the patient data. It is normally necessary to do this after importing the shapefile from an ESRI file. 
@@ -166,16 +164,12 @@ We see that 26 people move from A to C (65% of those in A and 8% of those that g
 # Show all regions
 minimap(shape)
 ```
-
-![plot of chunk minimap_example1](figure/minimap_example1-1.png)
 ![](man/figure/minimap_example1-1.png)
 
 ```r
 # Show region B
 minimap(shape, polygon = "B")
 ```
-
-![plot of chunk minimap_example2](figure/minimap_example2-1.png)
 ![](man/figure/minimap_example2-1.png)
 
 ```r
@@ -188,8 +182,6 @@ minimap(shape, polygon = "B|C", zoomout = .01)
 minimap(shape, polygon = "B|C", zoomout = 1)
 ```
 
-![plot of chunk minimap_example3](figure/minimap_example3-1.png)
-
 
 ![](man/figure/minimap_example3-1.png)
 
@@ -200,8 +192,6 @@ par(mfrow = c(1,2))
 minimap(shape, polygon = paste(unique(flow$to), collapse = "|"), zoomout = 0)
 minimap(shape, polygon = paste(shape$reg[!shape$reg %in% flow$from], collapse = "|"), zoomout = .75)
 ```
-
-![plot of chunk minimap_to_missing](figure/minimap_to_missing-1.png)
 ![](man/figure/minimap_to_missing-1.png)
 
 #### Generating HSAs
@@ -214,7 +204,6 @@ The goal of `HSAr` is to make the generation of HSAs quick and easy. The `gen_hs
 
 As an example, if we look at region S, the algorithm identifies the neighbours (H, I, P, T, V), then finds looks at from which most patients go to the focal hospital (H, I, T, V) and lumps those regions together with the hospital for the next iteration (remember that P has no patients, so that region doesn't appear in the flows, which are basically just cross tabulations).
 
-![plot of chunk flow_details](figure/flow_details-1.png)
 
 ```
 ##    from to  N rank_from
@@ -289,8 +278,6 @@ hsas <- gen_hsa(shp = shape, from = flow$from, to = flow$to)
 ## 
 ## HSAs produced 3
 ```
-
-![plot of chunk generate](figure/generate-1.png)
 ![](man/figure/generate-1.png)
 
 ```r
@@ -375,8 +362,6 @@ summary(hsas, plot = TRUE)
 ## 
 ## Creating 3 plots
 ```
-
-![plot of chunk summary](figure/summary-1.png)
 ![](man/figure/summary-1.png)
 
 Most important here are the localization index and number of interventions sections at the end. The plot option can be used to show three figures depicting the number of regions at each iteration of the loop and the number of interventions and localization index in the resulting HSAs. Options `li` and `n_interv` will also return these numbers in a table. 
@@ -389,8 +374,6 @@ par(mfrow = c(1,2))
 plot(hsas)
 minimap(hsas)
 ```
-
-![plot of chunk plotmethods](figure/plotmethods-1.png)
 ![](man/figure/plotmethods-1.png)
 
 The final shapefile and a lookup table to assign regions to HSAs are accessed via
@@ -440,8 +423,6 @@ par(mfrow = c(1,2))
 plot(chsas$shp)
 plot(hsas)
 ```
-
-![plot of chunk cluster](figure/cluster-1.png)
 ![](man/figure/cluster-1.png)
 
 
