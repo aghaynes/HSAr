@@ -192,7 +192,7 @@ Once this has been done, the algorithm starts again to ensure that no more HSAs 
 </details>
 
 By default, `gen_hsa` will plot a map of the current allocations at the beginning of each iteration. The number of iterations required depends the number of regions.
-```{r generate, fig.show = "hide"}
+```{r generate, fig.show = "hide", collapse = TRUE}
 par(mfrow = c(2,4))
 hsas <- gen_hsa(shp = shape, from = flow$from, to = flow$to)
 ```

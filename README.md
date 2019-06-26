@@ -238,43 +238,19 @@ By default, `gen_hsa` will plot a map of the current allocations at the beginnin
 ```r
 par(mfrow = c(2,4))
 hsas <- gen_hsa(shp = shape, from = flow$from, to = flow$to)
-```
-
-```
 ## Warning: 2 regions in 'shp' not in 'from'. 
 ## Warning: 17 regions in 'shp' not in 'to'.
-```
-
-```
 ## Iterating
 ## ....
-```
-
-```
 ##  11 
 ## ....
-```
-
-```
 ##  7 
 ## ...
-```
-
-```
 ##  6 
 ## ...
-```
-
-```
 ##  3 
 ## ...
-```
-
-```
 ##  3
-```
-
-```
 ## 
 ## HSAs produced 3
 ```
