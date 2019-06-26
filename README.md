@@ -1,8 +1,5 @@
 ---
-output: 
-  github_document:
-    toc: true
-    toc_depth: 5
+output: github_document
 bibliography: references.bib
 ---
 <!-- 
@@ -74,6 +71,7 @@ plot(shape)
 
 ![plot of chunk shape_example](figure/shape_example-1.png)
 
+![](man/figure/shape_example-1.png)
 
 The rownames of the spatial data should be consistent with the names in the patient data. It is normally necessary to do this after importing the shapefile from an ESRI file. 
 
@@ -169,14 +167,16 @@ We see that 26 people move from A to C (65% of those in A and 8% of those that g
 minimap(shape)
 ```
 
-![plot of chunk minimap_example](figure/minimap_example-1.png)
+![plot of chunk minimap_example1](figure/minimap_example1-1.png)
+![](man/figure/minimap_example1-1.png)
 
 ```r
 # Show region B
 minimap(shape, polygon = "B")
 ```
 
-![plot of chunk minimap_example](figure/minimap_example-2.png)
+![plot of chunk minimap_example2](figure/minimap_example2-1.png)
+![](man/figure/minimap_example2-1.png)
 
 ```r
 # Show region B or C
@@ -188,7 +188,10 @@ minimap(shape, polygon = "B|C", zoomout = .01)
 minimap(shape, polygon = "B|C", zoomout = 1)
 ```
 
-![plot of chunk minimap_example](figure/minimap_example-3.png)
+![plot of chunk minimap_example3](figure/minimap_example3-1.png)
+
+
+![](man/figure/minimap_example3-1.png)
 
 For our example, we could look at which regions have hospitals (or at least receive patients; left), and which receive no patients (right):
 
@@ -199,6 +202,7 @@ minimap(shape, polygon = paste(shape$reg[!shape$reg %in% flow$from], collapse = 
 ```
 
 ![plot of chunk minimap_to_missing](figure/minimap_to_missing-1.png)
+![](man/figure/minimap_to_missing-1.png)
 
 #### Generating HSAs
 The goal of `HSAr` is to make the generation of HSAs quick and easy. The `gen_hsa` (generate HSAs) function is the main work-horse of the package. It iteratively looks at each region which receives patients, identifies the neighbours and merges them with the hospital region if most flow is in that direction. It will keep doing that until it has allocated all regions. 
@@ -219,6 +223,7 @@ As an example, if we look at region S, the algorithm identifies the neighbours (
 ## 65    T  S 65         1
 ## 73    V  S 17         1
 ```
+![](man/figure/flow_details-1.png)
 
 The next iteration for hospital S then looks at regions neighbouring S+H+I+V+T and merges them if most patients go to S (or another hospital within S+H+I+V+T, if that should be the case), which might be region U. In this way, HSAs grow organically around the hospitals.
 
@@ -285,6 +290,9 @@ hsas <- gen_hsa(shp = shape, from = flow$from, to = flow$to)
 ## HSAs produced 3
 ```
 
+![plot of chunk generate](figure/generate-1.png)
+![](man/figure/generate-1.png)
+
 ```r
 summary(hsas)
 ```
@@ -322,8 +330,7 @@ summary(hsas)
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 ##   318.0   336.5   355.0   392.7   430.0   505.0
 ```
-
-![plot of chunk generate](figure/generate-1.png)
+![](man/figure/generate2-1.png)
 
 Summary, plot and minimap methods exist for the returned hsa object, making it easy to view the results. 
 
@@ -370,6 +377,7 @@ summary(hsas, plot = TRUE)
 ```
 
 ![plot of chunk summary](figure/summary-1.png)
+![](man/figure/summary-1.png)
 
 Most important here are the localization index and number of interventions sections at the end. The plot option can be used to show three figures depicting the number of regions at each iteration of the loop and the number of interventions and localization index in the resulting HSAs. Options `li` and `n_interv` will also return these numbers in a table. 
 
@@ -383,6 +391,7 @@ minimap(hsas)
 ```
 
 ![plot of chunk plotmethods](figure/plotmethods-1.png)
+![](man/figure/plotmethods-1.png)
 
 The final shapefile and a lookup table to assign regions to HSAs are accessed via
 
@@ -433,7 +442,7 @@ plot(hsas)
 ```
 
 ![plot of chunk cluster](figure/cluster-1.png)
-
+![](man/figure/cluster-1.png)
 
 
 # References

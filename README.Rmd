@@ -1,8 +1,5 @@
 ---
-output: 
-  github_document:
-    toc: true
-    toc_depth: 5
+output: github_document
 bibliography: references.bib
 ---
 <!-- 
@@ -12,7 +9,8 @@ Rather than clicking the knit button in RStudio, run knitr::knit("README.Rmd"), 
 
 ```{r, echo = FALSE}
 knitr::opts_knit$set(base.dir = "man",
-                     collapse = TRUE)
+                     collapse = TRUE,
+                     fig.show = FALSE)
 ```
 
 
@@ -71,6 +69,7 @@ data(shape)
 plot(shape)
 ```
 
+![](man/figure/shape_example-1.png)
 
 The rownames of the spatial data should be consistent with the names in the patient data. It is normally necessary to do this after importing the shapefile from an ESRI file. 
 ```{r}
@@ -117,11 +116,17 @@ We see that 26 people move from A to C (65% of those in A and 8% of those that g
 #### Exploring maps
 `HSAr` also provides a functions for exploring maps. You might want to look at a specific HSA for example. The `minimap` function allows you to zoom into a given HSA (or more generally, a polygon in a shapefile) by providing suitable a regular expression to identify it (see `?regex`). The selected regions are highlighted in green.
 
-```{r minimap_example}
+```{r minimap_example1}
 # Show all regions
 minimap(shape)
+```
+![](man/figure/minimap_example1-1.png)
+```{r minimap_example2}
 # Show region B
 minimap(shape, polygon = "B")
+```
+![](man/figure/minimap_example2-1.png)
+```{r minimap_example3}
 # Show region B or C
 par(mfrow = c(1,3))
 minimap(shape, polygon = "B|C")
@@ -132,13 +137,16 @@ minimap(shape, polygon = "B|C", zoomout = 1)
 
 ```
 
+
+![](man/figure/minimap_example3-1.png)
+
 For our example, we could look at which regions have hospitals (or at least receive patients; left), and which receive no patients (right):
 ```{r minimap_to_missing}
 par(mfrow = c(1,2))
 minimap(shape, polygon = paste(unique(flow$to), collapse = "|"), zoomout = 0)
 minimap(shape, polygon = paste(shape$reg[!shape$reg %in% flow$from], collapse = "|"), zoomout = .75)
-
 ```
+![](man/figure/minimap_to_missing-1.png)
 
 #### Generating HSAs
 The goal of `HSAr` is to make the generation of HSAs quick and easy. The `gen_hsa` (generate HSAs) function is the main work-horse of the package. It iteratively looks at each region which receives patients, identifies the neighbours and merges them with the hospital region if most flow is in that direction. It will keep doing that until it has allocated all regions. 
@@ -161,6 +169,7 @@ As an example, if we look at region `r h`, the algorithm identifies the neighbou
 minimap(shape[shape$reg %in% c(h, on), ], shape, polygon = h, zoomout = 2)
 f2
 ```
+![](man/figure/flow_details-1.png)
 
 The next iteration for hospital S then looks at regions neighbouring S+H+I+V+T and merges them if most patients go to S (or another hospital within S+H+I+V+T, if that should be the case), which might be region U. In this way, HSAs grow organically around the hospitals.
 
@@ -186,8 +195,12 @@ By default, `gen_hsa` will plot a map of the current allocations at the beginnin
 ```{r generate}
 par(mfrow = c(2,4))
 hsas <- gen_hsa(shp = shape, from = flow$from, to = flow$to)
+```
+![](man/figure/generate-1.png)
+```{r generate2}
 summary(hsas)
 ```
+![](man/figure/generate2-1.png)
 
 Summary, plot and minimap methods exist for the returned hsa object, making it easy to view the results. 
 
@@ -195,6 +208,7 @@ Summary, plot and minimap methods exist for the returned hsa object, making it e
 par(mfrow = c(1,3))
 summary(hsas, plot = TRUE)
 ```
+![](man/figure/summary-1.png)
 
 Most important here are the localization index and number of interventions sections at the end. The plot option can be used to show three figures depicting the number of regions at each iteration of the loop and the number of interventions and localization index in the resulting HSAs. Options `li` and `n_interv` will also return these numbers in a table. 
 
@@ -205,6 +219,7 @@ par(mfrow = c(1,2))
 plot(hsas)
 minimap(hsas)
 ```
+![](man/figure/plotmethods-1.png)
 
 The final shapefile and a lookup table to assign regions to HSAs are accessed via
 ```{r}
@@ -230,7 +245,7 @@ par(mfrow = c(1,2))
 plot(chsas$shp)
 plot(hsas)
 ```
-
+![](man/figure/cluster-1.png)
 
 
 # References
