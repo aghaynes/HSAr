@@ -10,7 +10,7 @@ Rather than clicking the knit button in RStudio, run knitr::knit("README.Rmd"), 
 ```{r, echo = FALSE}
 knitr::opts_knit$set(base.dir = "man",
                      collapse = TRUE,
-                     fig.show = FALSE)
+                     fig.show = "hide")
 ```
 
 
@@ -64,7 +64,7 @@ plot(shape)
 Whichever way you choose to use to get your spatial data into R, it needs to be a SpatialPolygonsDataFrame object (as opposed to a sf object). If you have an sf type object, `as(x, "Spatial")` can be used.
 
 `HSAr` has an example shapefile which can be loaded via
-```{r shape_example}
+```{r shape_example, fig.show = "hide"}
 data(shape)
 plot(shape)
 ```
@@ -116,24 +116,24 @@ We see that 26 people move from A to C (65% of those in A and 8% of those that g
 #### Exploring maps
 `HSAr` also provides a functions for exploring maps. You might want to look at a specific HSA for example. The `minimap` function allows you to zoom into a given HSA (or more generally, a polygon in a shapefile) by providing suitable a regular expression to identify it (see `?regex`). The selected regions are highlighted in green.
 
-```{r minimap_example1}
+```{r minimap_example1, fig.show = "hide"}
 # Show all regions
 minimap(shape)
 ```
 ![](man/figure/minimap_example1-1.png)
-```{r minimap_example2}
+```{r minimap_example2, fig.show = "hide"}
 # Show region B
 minimap(shape, polygon = "B")
 ```
 ![](man/figure/minimap_example2-1.png)
-```{r minimap_example3}
+```{r minimap_example3, fig.show = "hide"}
 # Show region B or C
 par(mfrow = c(1,3))
 minimap(shape, polygon = "B|C")
 # equivalently, minimap(shape, polygon = "[BC]")
 # changing the zoom is also possible, which is particularly useful for larger maps
 minimap(shape, polygon = "B|C", zoomout = .01)
-minimap(shape, polygon = "B|C", zoomout = 1)
+minimap(shape, polygon = "B|C", zoomout = .5)
 
 ```
 
@@ -141,7 +141,7 @@ minimap(shape, polygon = "B|C", zoomout = 1)
 ![](man/figure/minimap_example3-1.png)
 
 For our example, we could look at which regions have hospitals (or at least receive patients; left), and which receive no patients (right):
-```{r minimap_to_missing}
+```{r minimap_to_missing, fig.show = "hide"}
 par(mfrow = c(1,2))
 minimap(shape, polygon = paste(unique(flow$to), collapse = "|"), zoomout = 0)
 minimap(shape, polygon = paste(shape$reg[!shape$reg %in% flow$from], collapse = "|"), zoomout = .75)
@@ -165,7 +165,7 @@ f2 <- f[w, c("from", "to", "N", "rank_from")]
 
 As an example, if we look at region `r h`, the algorithm identifies the neighbours (`r paste(on, collapse = ", ")`), then finds looks at from which most patients go to the focal hospital (`r paste(f2$from, collapse = ", ")`) and lumps those regions together with the hospital for the next iteration (remember that P has no patients, so that region doesn't appear in the flows, which are basically just cross tabulations).
 
-```{r flow_details, echo = FALSE}
+```{r flow_details, echo = FALSE, fig.show = "hide"}
 minimap(shape[shape$reg %in% c(h, on), ], shape, polygon = h, zoomout = 2)
 f2
 ```
@@ -192,19 +192,19 @@ Once this has been done, the algorithm starts again to ensure that no more HSAs 
 </details>
 
 By default, `gen_hsa` will plot a map of the current allocations at the beginning of each iteration. The number of iterations required depends the number of regions.
-```{r generate}
+```{r generate, fig.show = "hide"}
 par(mfrow = c(2,4))
 hsas <- gen_hsa(shp = shape, from = flow$from, to = flow$to)
 ```
 ![](man/figure/generate-1.png)
-```{r generate2}
+```{r generate2, fig.show = "hide"}
 summary(hsas)
 ```
 ![](man/figure/generate2-1.png)
 
 Summary, plot and minimap methods exist for the returned hsa object, making it easy to view the results. 
 
-```{r summary, fig.height=3}
+```{r summary, fig.height=3, fig.show = "hide"}
 par(mfrow = c(1,3))
 summary(hsas, plot = TRUE)
 ```
@@ -214,7 +214,7 @@ Most important here are the localization index and number of interventions secti
 
 Both plot and minimap methods show the regions making up the HSAs as well as the HSAs themselves (in grey), but minimap adds labels to the map.
 
-```{r plotmethods}
+```{r plotmethods, fig.show = "hide"}
 par(mfrow = c(1,2))
 plot(hsas)
 minimap(hsas)
@@ -239,7 +239,7 @@ Besides using the distance between the regions to define the similarity, we also
   2. As with the HSAr method above, the cluster based approach cannot allocate regions without flow to a HSA. As above, we have implemented the same filling algorithm here. To turn it off, set the `fill` option to `FALSE`.
 
 
-```{r cluster}
+```{r cluster, fig.show = "hide"}
 chsas <- gen_hsa_clust(shp = shape, from = flow$from, to = flow$to, max_clusters = 21, peaks = "diff")
 par(mfrow = c(1,2))
 plot(chsas$shp)
