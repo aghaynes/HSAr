@@ -246,3 +246,23 @@ plot(hsas)
 
 # References
 
+<div id="refs" class="references">
+
+<div id="ref-delamater2013">
+
+Delamater, Paul L., Ashton M. Shortridge, and Joseph P. Messina. 2013.
+“Regional Health Care Planning: A Methodology to Cluster Facilities
+Using Community Utilization Patterns.” *BMC Health Services Research* 13
+(1):333. <https://doi.org/10.1186/1472-6963-13-333>.
+
+</div>
+
+<div id="ref-Wennberg1973">
+
+Wennberg, John, and Alan Gittelsohn. 1973. “Small Area Variations in
+Health Care Delivery.” *Science* 182.
+<https://doi.org/10.1126/science.182.4117.1102>.
+
+</div>
+
+</div>
