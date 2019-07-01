@@ -5,6 +5,7 @@ bibliography: references.bib
 <!-- 
 README.md is generated from README.Rmd. Please edit that file 
 Rather than clicking the knit button in RStudio, run knitr::knit("README.Rmd"), otherwise figures go elsewhere (base.dir appears to be ignored)
+References need to copied in manually from a version using the knit button in RStudio (strangely, they dont seem to be generated using knitr::knit)
 -->
 
 ```{r, echo = FALSE}
