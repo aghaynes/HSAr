@@ -5,6 +5,7 @@ bibliography: references.bib
 <!-- 
 README.md is generated from README.Rmd. Please edit that file 
 Rather than clicking the knit button in RStudio, run knitr::knit("README.Rmd"), otherwise figures go elsewhere (base.dir appears to be ignored)
+References need to copied in manually from a version using the knit button in RStudio (strangely, they dont seem to be generated using knitr::knit)
 -->
 
 ```{r, echo = FALSE}
@@ -20,7 +21,7 @@ knitr::opts_knit$set(base.dir = "man",
 
 Hospital service areas (HSAs) are often used in healthcare analyses, particularly for studying variation in rates, cost and quality. Rather than being tied to geopolitical regions (such as counties, states or cantons), HSAs are defined using patient movement and thus reflect patients usage patterns.
 
-Originally described in the 1970's [@Wennberg1973], the classical approach to defining HSAs has changed little since then and involves some highly subjective decisions, and the method is thus not reproducible. `HSAr` is an attempt to create a reproducible method to create HSAs using the open access R language (as such it's use is not hampered by pay walls and only a modest knowledge of R should suffice to use it).
+Originally described in the 1970's (Wennberg & Gittelsohn 1973), the classical approach to defining HSAs has changed little since then and involves some highly subjective decisions, and the method is thus not reproducible. `HSAr` is an attempt to create a reproducible method to create HSAs using the open access R language (as such it's use is not hampered by pay walls and only a modest knowledge of R should suffice to use it).
 
 This method is described in a paper provisionally accepted at Health Services Research.
 
@@ -227,7 +228,7 @@ These files can then be saved for later use in R or other software.
 
 #### A clustering based approach
 
-A clustering based approach to creating hospital regions was published by [@delamater2013], together with code for its implementation. A modified version is provided here, as it is discussed in the provisionally accepted paper. Where original method used hospital beds and staffing to define the similarity among hospitals, we use the distance between regions and the patient flows. The method uses a two-step K-means and Wards clustering approach to first derive the best number of clusters (HSAs) and then assign regions to a cluster. Compared to the more classical approach, this method can produce very different results and might be better for cases where there are already more distinct regions in the data (e.g. fewer, larger hospitals which have natural catchment areas, rather than cases where there are many hospitals with largely overlapping catchments). The example data provided in the package, for example, was designed to produce three HSAs, which it does using the method above. Using the cluster-based approach it produces only two HSAs.
+A clustering based approach to creating hospital regions was published by Delamater et al (2013), together with code for its implementation. A modified version is provided here, as it is discussed in the provisionally accepted paper. Where original method used hospital beds and staffing to define the similarity among hospitals, we use the distance between regions and the patient flows. The method uses a two-step K-means and Wards clustering approach to first derive the best number of clusters (HSAs) and then assign regions to a cluster. Compared to the more classical approach, this method can produce very different results and might be better for cases where there are already more distinct regions in the data (e.g. fewer, larger hospitals which have natural catchment areas, rather than cases where there are many hospitals with largely overlapping catchments). The example data provided in the package, for example, was designed to produce three HSAs, which it does using the method above. Using the cluster-based approach it produces only two HSAs.
 
 Besides using the distance between the regions to define the similarity, we also made two other changes to the original implementation:
 
