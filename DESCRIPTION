@@ -4,7 +4,7 @@ Version: 0.0.0.9000
 Authors@R: person("Alan", "Haynes", email = "alan.haynes@ctu.unibe.ch", role = c("aut", "cre"))
 Description: Automates the delineation of hospital service areas (HSAs). Previous methods rely extensively on manual, subjective decisions regarding to which HSA a given unit should be assigned. This package provides a method to construct contiguous HSAs using spatial shapefiles and source-destination patient flow data.
 Depends: R (>= 3.3.2), data.table, rgeos, maptools
-License: What license is it under?
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
