@@ -1,13 +1,29 @@
 #' Minimaps of generated HSAs
 #'
-#' @param object object of hsa class (i.e. from gen_hsa(...))
-#' @param hsa string - a regex expression defining which HSA(s) to plot
-#' @param lake shapefile containing lakes (SpatialPolygons format)
+#' @param object object of class \code{hsa} (i.e. from gen_hsa(...)) or \code{SpatialPolygons}
+#' @param object2 object of class \code{SpatialPolygons}
+#' @param hsa string - a regex expression defining which HSA(s) to highlight
+#' @param reg string - a regex expression defining which regions from the original shapefile(s) to highlight
+#' @param polygon string - a regex expression defining which polygon(s) from \code{object} to highlight
 #' @param col colour to use for focus area
 #' @param bcol HSA border colour
+#' @param hsalab logical - plot HSA labels
+#' @param hsalabcol colour to HSA labels
 #' @param regbcol colour to use for region borders
+#' @param reglab logical - plot original region labels
+#' @param reglabcol colour to original region labels
+#' @param object2_bcol colour to use for \code{object2} borders
+#' @param object2_lab logical - plot \code{object2} labels
+#' @param object2_labcol colour to \code{object2} labels
+#' @param lab logical - plot labels
+#' @param labcol colour to plot labels
+#' @param lakes shapefile containing lakes (SpatialPolygons format)
 #' @param lcol colour to use for lakes
-#' @return 
+#' @param zoomout degree of zoom
+#' @param bg background colour
+#' @param dev device to plot too
+#' @param ... other options passed to plot
+#' @return
 #' @export minimap.hsa
 #' @export minimap.default
 #' @export minimap.SpatialPolygonsDataFrame
@@ -18,22 +34,22 @@ minimap <- function(object, ...) UseMethod("minimap", object)
 
 minimap.default <- function() stop("No minimap method for this class type")
 
-minimap.hsa <- function(object, 
-                        hsa = NULL, 
-                        reg = NULL, 
-                        col = "green", 
-                        bcol = "blue", 
-                        hsalab = TRUE, 
-                        hsalabcol = "blue", 
-                        regbcol = "grey", 
-                        reglab = TRUE, 
+minimap.hsa <- function(object,
+                        hsa = NULL,
+                        reg = NULL,
+                        col = "green",
+                        bcol = "blue",
+                        hsalab = TRUE,
+                        hsalabcol = "blue",
+                        regbcol = "grey",
+                        reglab = TRUE,
                         reglabcol = "black",
-                        lakes = NULL, 
-                        lcol = "skyblue", 
-                        zoomout = 1, 
-                        bg = "white", 
+                        lakes = NULL,
+                        lcol = "skyblue",
+                        zoomout = 1,
+                        bg = "white",
                         dev = dev.cur(), ...){
-  
+
   poly <- SpatialPolygons(object$shp@polygons)
   pars <- par("mai")
   on.exit(par(mai = pars))
@@ -49,7 +65,7 @@ minimap.hsa <- function(object,
     ywidth <- (x[4] - x[3])*zoomout
     ylims <- c(x[3]-ywidth, x[4]+ywidth)
     plot(poly[grepl(hsa, rownames(object$shp@data))], col = col, xlim = xlims, ylim = ylims, bg = bg, ...)
-    plot(object$shp, add = TRUE)  
+    plot(object$shp, add = TRUE)
     } else if(!is.null(reg)){
     poly <- SpatialPolygons(object$original_shp@polygons)
     plot(poly[grepl(hsa, rownames(object$shp@data))], col = col, bg = bg)
@@ -61,15 +77,15 @@ minimap.hsa <- function(object,
     #   ylims <- c(x[3]-ywidth, x[4]+ywidth)
     #   plot(poly[grepl(hsa, rownames(object$shp@data))], col = col, xlim = xlims, ylim = ylims)
     # }
-    plot(object$shp, add = TRUE) 
+    plot(object$shp, add = TRUE)
   } else {
-    plot(object, bg = bg)  
+    plot(object, bg = bg)
   }
-  
+
   if(!is.null(lakes)) plot(lakes, col = lcol, add = TRUE, border = NA)
   plot(object$original_shp, border = regbcol, add = TRUE)
   plot(object$shp, border = bcol, add = TRUE)
-  
+
   if(reglab){
     co <- coordinates(object$original_shp)
     text(x = co[,1], y = co[,2], labels = rownames(object$original_shp@data), col = reglabcol, cex = .5)
@@ -87,22 +103,22 @@ minimap.hsa.clust <- function(...){
 }
 
 
-minimap.SpatialPolygonsDataFrame <- function(object, 
-                                             object2 = NULL, 
-                                             polygon = NULL, 
-                                             col = "green", 
-                                             bcol = "blue", 
-                                             lab = TRUE, 
-                                             labcol = "blue", 
-                                             lakes = NULL, 
-                                             lcol = "skyblue", 
-                                             zoomout = 1, 
-                                             bg = "white", 
+minimap.SpatialPolygonsDataFrame <- function(object,
+                                             object2 = NULL,
+                                             polygon = NULL,
+                                             col = "green",
+                                             bcol = "blue",
+                                             lab = TRUE,
+                                             labcol = "blue",
+                                             lakes = NULL,
+                                             lcol = "skyblue",
+                                             zoomout = 1,
+                                             bg = "white",
                                              object2_bcol = "grey",
                                              object2_lab = TRUE,
                                              object2_labcol = "grey",
                                              dev = dev.cur(), ...){
-  
+
   poly <- SpatialPolygons(object@polygons)
   pars <- par("mai")
   on.exit(par(mai = pars))
@@ -119,11 +135,11 @@ minimap.SpatialPolygonsDataFrame <- function(object,
     ywidth <- (x[4] - x[3])*zoomout
     ylims <- c(x[3]-ywidth, x[4]+ywidth)
     plot(poly, col = col, xlim = xlims, ylim = ylims, bg = bg)
-    plot(object, add = TRUE, border = bcol)  
+    plot(object, add = TRUE, border = bcol)
   } else {
-    plot(object, bg = bg, col = col, border = bcol)  
+    plot(object, bg = bg, col = col, border = bcol)
   }
-  
+
   if(!is.null(lakes)) plot(lakes, col = lcol, add = TRUE, border = NA)
   if(!is.null(object2)) {
     plot(object2, border = object2_bcol, add = TRUE)
@@ -133,7 +149,7 @@ minimap.SpatialPolygonsDataFrame <- function(object,
     }
   }
   plot(object, border = bcol, add = TRUE)
-  
+
   if(lab){
     co <- coordinates(object)
     text(x = co[,1], y = co[,2], labels = rownames(co), col = labcol, cex = 1, font = 2)
@@ -146,11 +162,11 @@ minimap.SpatialPolygons <- function(...){
 }
 
 
-minimap.sf <- function(object, idvar, polygon = NULL, 
-                       col = "green", bcol = "blue", 
-                       lab = TRUE, labcol = "blue", 
-                       lakes = NULL, lcol = "skyblue", 
-                       zoomout = 1, bg = "white", 
+minimap.sf <- function(object, idvar, polygon = NULL,
+                       col = "green", bcol = "blue",
+                       lab = TRUE, labcol = "blue",
+                       lakes = NULL, lcol = "skyblue",
+                       zoomout = 1, bg = "white",
                        dev = dev.cur(),...){
   pars <- par("mai")
   on.exit(par(mai = pars))
@@ -167,14 +183,14 @@ minimap.sf <- function(object, idvar, polygon = NULL,
     ywidth <- (x[4] - x[3])*zoomout
     ylims <- c(x[3]-ywidth, x[4]+ywidth)
     plot(poly$geometry, col = col, xlim = xlims, ylim = ylims, bg = bg)
-    plot(object$geometry, add = TRUE, col = NA, border = bcol)  
+    plot(object$geometry, add = TRUE, col = NA, border = bcol)
   } else {
-    plot(object$geometry, bg = bg, col = NA, border = bcol)  
+    plot(object$geometry, bg = bg, col = NA, border = bcol)
   }
-  
+
   if(!is.null(lakes)) plot(lakes, col = lcol, add = TRUE, border = NA)
   plot(object$geometry, border = bcol, add = TRUE, col = NA)
-  
+
   if(lab){
     co <- st_centroid(object)
     geom <- as.character(co$geometry)

@@ -7,19 +7,51 @@
 minimap(object, ...)
 }
 \arguments{
-\item{object}{object of hsa class (i.e. from gen_hsa(...))}
+\item{object}{object of class \code{hsa} (i.e. from gen_hsa(...)) or \code{SpatialPolygons}}
 
-\item{hsa}{string - a regex expression defining which HSA(s) to plot}
+\item{...}{other options passed to plot}
 
-\item{lake}{shapefile containing lakes (SpatialPolygons format)}
+\item{object2}{object of class \code{SpatialPolygons}}
+
+\item{hsa}{string - a regex expression defining which HSA(s) to highlight}
+
+\item{reg}{string - a regex expression defining which regions from the original shapefile(s) to highlight}
+
+\item{polygon}{string - a regex expression defining which polygon(s) from \code{object} to highlight}
 
 \item{col}{colour to use for focus area}
 
 \item{bcol}{HSA border colour}
 
+\item{hsalab}{logical - plot HSA labels}
+
+\item{hsalabcol}{colour to HSA labels}
+
 \item{regbcol}{colour to use for region borders}
 
+\item{reglab}{logical - plot original region labels}
+
+\item{reglabcol}{colour to original region labels}
+
+\item{object2_bcol}{colour to use for \code{object2} borders}
+
+\item{object2_lab}{logical - plot \code{object2} labels}
+
+\item{object2_labcol}{colour to \code{object2} labels}
+
+\item{lab}{logical - plot labels}
+
+\item{labcol}{colour to plot labels}
+
+\item{lakes}{shapefile containing lakes (SpatialPolygons format)}
+
 \item{lcol}{colour to use for lakes}
+
+\item{zoomout}{degree of zoom}
+
+\item{bg}{background colour}
+
+\item{dev}{device to plot too}
 }
 \description{
 Minimaps of generated HSAs
