@@ -68,7 +68,7 @@ minimap.hsa <- function(object,
     plot(object$shp, add = TRUE)
     } else if(!is.null(reg)){
     poly <- SpatialPolygons(object$original_shp@polygons)
-    plot(poly[grepl(hsa, rownames(object$shp@data))], col = col, bg = bg)
+    plot(poly[grepl(reg, rownames(object$shp@data))], col = col, bg = bg)
     # if(zoomout){
     #   x <- par("usr")
     #   xwidth <- x[2] - x[1]
